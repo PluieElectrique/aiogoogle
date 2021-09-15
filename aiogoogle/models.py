@@ -120,9 +120,10 @@ class MediaDownload:
 
     """
 
-    def __init__(self, file_path, chunk_size=None):
+    def __init__(self, file_path, chunk_size=None, size=None):
         self.file_path = file_path
         self.chunk_size = chunk_size or DEFAULT_DOWNLOAD_CHUNK_SIZE
+        self.size = size
 
 
 class Request:

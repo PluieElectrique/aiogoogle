@@ -2,12 +2,14 @@ __all__ = ["AiohttpSession"]
 
 import asyncio
 from json import JSONDecodeError
+import os.path
 
 from aiohttp import ClientSession, MultipartWriter
 from aiohttp.client_exceptions import ContentTypeError
 import aiofiles
 from aiofiles import os as async_os
 import async_timeout
+from tqdm import tqdm
 
 from ..models import Response
 from .abc import AbstractSession
@@ -51,9 +53,26 @@ class AiohttpSession(ClientSession, AbstractSession):
             if request.media_download:
                 chunk_size = request.media_download.chunk_size
                 download_file = request.media_download.file_path
+
+                desc = os.path.basename(download_file)
+                if len(desc) > 60:
+                    desc = desc[:28] + "<..>" + desc[-28:]
+                elif len(desc) < 60:
+                    desc = f"{desc:<60}"
+
+                pbar = tqdm(
+                    total=request.media_download.size,
+                    desc=desc,
+                    unit="B",
+                    unit_scale=True,
+                )
+
                 async with aiofiles.open(download_file, "wb+") as f:
                     async for line in response.content.iter_chunked(chunk_size):
                         await f.write(line)
+                        pbar.update(len(line))
+
+                pbar.close()
             else:
                 if response.status != 204:  # If no (no content)
                     try:

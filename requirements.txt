@@ -3,3 +3,4 @@ aiofiles
 google-auth
 tonyg-rfc3339
 async-timeout
+tqdm
