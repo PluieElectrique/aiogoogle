@@ -65,6 +65,7 @@ class AiohttpSession(ClientSession, AbstractSession):
                     desc=desc,
                     unit="B",
                     unit_scale=True,
+                    leave=False,
                 )
 
                 async with aiofiles.open(download_file, "wb+") as f:
