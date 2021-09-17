@@ -15,6 +15,25 @@ from ..models import Response
 from .abc import AbstractSession
 
 
+
+# https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-759205696
+from aiohttp import TCPConnector
+from aiohttp.client_reqrep import ClientRequest
+import socket
+
+
+class KeepAliveClientRequest(ClientRequest):
+    async def send(self, conn: "Connection") -> "ClientResponse":
+        sock = conn.protocol.transport.get_extra_info("socket")
+        sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, 60)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, 2)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, 5)
+
+        return (await super().send(conn))
+
+
+
 async def _get_file_size(full_file_path):
     stat = await async_os.stat(full_file_path)
     return stat.st_size
@@ -35,6 +54,10 @@ async def _read_file(file_name):
 
 
 class AiohttpSession(ClientSession, AbstractSession):
+    def __init__(self):
+        # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-759205696
+        super().__init__(request_class=KeepAliveClientRequest)
+
     async def send(
         self,
         *requests,
@@ -106,6 +129,9 @@ class AiohttpSession(ClientSession, AbstractSession):
         async def fire_request(request):
             request.headers["Accept-Encoding"] = "gzip"
             request.headers["User-Agent"] = "Aiogoogle Aiohttp (gzip)"
+            # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-759205696
+            request.headers['Connection'] = 'keep-alive'
+
             if request.media_upload:
                 # Validate
                 await request.media_upload.run_validation(_get_file_size)
