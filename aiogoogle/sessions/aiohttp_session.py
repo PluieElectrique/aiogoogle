@@ -56,7 +56,15 @@ async def _read_file(file_name):
 class AiohttpSession(ClientSession, AbstractSession):
     def __init__(self):
         # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-759205696
-        super().__init__(request_class=KeepAliveClientRequest)
+        super().__init__(
+            request_class=KeepAliveClientRequest,
+            timeout=aiohttp.ClientTimeout(
+                total=10 * 60,
+                connect=60,
+                sock_connect=60,
+                sock_read=60,
+            )
+        )
 
     async def send(
         self,
