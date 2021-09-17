@@ -15,6 +15,7 @@ from ..models import Response
 from .abc import AbstractSession
 
 
+from aiohttp import ClientTimeout
 
 # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-759205696
 from aiohttp import TCPConnector
@@ -58,7 +59,7 @@ class AiohttpSession(ClientSession, AbstractSession):
         # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-759205696
         super().__init__(
             request_class=KeepAliveClientRequest,
-            timeout=aiohttp.ClientTimeout(
+            timeout=ClientTimeout(
                 total=10 * 60,
                 connect=60,
                 sock_connect=60,
