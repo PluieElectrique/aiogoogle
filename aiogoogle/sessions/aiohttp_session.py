@@ -140,6 +140,8 @@ class AiohttpSession(ClientSession, AbstractSession):
             request.headers["User-Agent"] = "Aiogoogle Aiohttp (gzip)"
             # https://github.com/aio-libs/aiohttp/issues/3904#issuecomment-759205696
             request.headers['Connection'] = 'keep-alive'
+            if request.media_download and request.media_download.id_resource_key:
+                request.headers["X-Goog-Drive-Resource-Keys"] = request.media_download.id_resource_key
 
             if request.media_upload:
                 # Validate

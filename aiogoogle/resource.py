@@ -61,6 +61,7 @@ def _temporarily_add_back_dashes_to_param_definitions(f):
         upload_file=None,
         download_file=None,
         download_file_size=None,
+        download_file_id_resource_key=None,
         timeout=None,
         **uri_params,
     ):
@@ -86,6 +87,7 @@ def _temporarily_add_back_dashes_to_param_definitions(f):
             upload_file,
             download_file,
             download_file_size,
+            download_file_id_resource_key,
             timeout,
             **uri_params,
         )
@@ -390,6 +392,7 @@ class Method:
         upload_file=None,
         download_file=None,
         download_file_size=None,
+        download_file_id_resource_key=None,
         timeout=None,
         **uri_params,
     ) -> Request:
@@ -558,7 +561,7 @@ class Method:
                     raise ValidationError(
                         "download_file was provided while method doesn't support media download"
                     )
-            media_download = MediaDownload(download_file, size=download_file_size)
+            media_download = MediaDownload(download_file, size=download_file_size, id_resource_key=download_file_id_resource_key)
         else:
             media_download = None
 
